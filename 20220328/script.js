@@ -1,18 +1,17 @@
 const video = document.getElementById('video')
-var mBlinkSound = new Audio("/sound/shotgun-firing1.mp3");
 
 Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri('/facemodels'),
-  faceapi.nets.faceLandmark68Net.loadFromUri('/facemodels'),
-  faceapi.nets.faceRecognitionNet.loadFromUri('/facemodels'),
-  faceapi.nets.faceExpressionNet.loadFromUri('/facemodels')
+  faceapi.nets.tinyFaceDetector.loadFromUri('./facemodels'),
+  faceapi.nets.faceLandmark68Net.loadFromUri('./facemodels'),
+  faceapi.nets.faceRecognitionNet.loadFromUri('./facemodels'),
+  faceapi.nets.faceExpressionNet.loadFromUri('./facemodels')
 ]).then(startVideo)
 
 function startVideo() {
 
   if (navigator.userAgent.match(/iPhone|iPad|Android/)) { ///iPhone|Android.+Mobile/
     console.log("Mobile");
-     video.width = 400; //1080;
+     video.width = 200; //1080;
 
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
     .then(localMediaStream => {
@@ -27,21 +26,16 @@ function startVideo() {
       console.error(`Not available!!!!`, err);
     });
 
-  } 
+  }
   else {
     console.log("PC");
     navigator.getUserMedia(
         { video: {} },
         stream => video.srcObject = stream,
         err => console.error(err)
-      )    
+      )
   }
   console.log("video:"+[video.width, video.height]);
-
-  // let div = document.createElement('div')
-  // div.innerText = 'video size:'+video.width+', '+video.height
-  // console.log(div.innerText);
-  // document.body.appendChild(div)
 }
 
 video.addEventListener('play', () => {
@@ -51,9 +45,6 @@ video.addEventListener('play', () => {
   canvas_bg.height = video.height;
   document.body.append(canvas_bg)
   var ctx_bg = canvas_bg.getContext('2d');
-  // ctx_bg.fillStyle = "rgb(0,0,0)";
-  // ctx_bg.fillRect(0, 0, video.width, video.height/2);
-
   var canvas_face = document.createElement("canvas");
   canvas_face.width = video.width;
   canvas_face.height = video.height;
@@ -63,7 +54,7 @@ video.addEventListener('play', () => {
   document.body.append(canvas)
   const displaySize = { width: video.width, height: video.height }
   faceapi.matchDimensions(canvas, displaySize)
-  
+
   var t1 = performance.now();
   var irisC = [];
   let nowBlinking = false;
@@ -97,26 +88,6 @@ video.addEventListener('play', () => {
     w_ = landmarkPositions[45-1].x - landmarkPositions[44-1].x
     h_ = landmarkPositions[48-1].y - landmarkPositions[44-1].y
     ctx_bg.fillRect(x_, y_, w_, h_)
-
-    //--- Face mask ---//
-    ctx_bg.fillStyle = 'rgb(0,200,0)';
-    ctx_bg.beginPath();
-    ctx_bg.moveTo(landmarkPositions[0].x, landmarkPositions[0].y);
-    for(var i=1;i<17;i++){
-      ctx_bg.lineTo(landmarkPositions[i].x, landmarkPositions[i].y);
-    }
-    ctx_bg.fill();
-
-    ctx_bg.moveTo(landmarkPositions[0].x, landmarkPositions[0].y);
-    ctx_bg.lineTo(landmarkPositions[17].x, landmarkPositions[17].y);
-    ctx_bg.lineTo(landmarkPositions[27].x, landmarkPositions[17].y);
-    ctx_bg.lineTo(landmarkPositions[27].x, landmarkPositions[0].y);
-    //ctx_bg.lineTo(landmarkPositions[26].x, landmarkPositions[26].y);
-    ctx_bg.lineTo(landmarkPositions[16].x, landmarkPositions[16].y);
-    ctx_bg.lineTo(landmarkPositions[16].x, landmarkPositions[16].y-200);
-    ctx_bg.lineTo(landmarkPositions[0].x, landmarkPositions[0].y-200);
-    ctx_bg.lineTo(landmarkPositions[0].x, landmarkPositions[0].y);
-    ctx_bg.fill();
 
     //--- Iris value ---//
     ctx_face.clearRect(0, 0, canvas_face.width, canvas_face.height)
